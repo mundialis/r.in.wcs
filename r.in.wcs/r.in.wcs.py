@@ -109,7 +109,8 @@ from grass.script import core as grass
 from grass.pygrass.utils import get_lib_path
 from grass.script.utils import try_rmdir
 
-from grass_gis_helpers.general import set_nprocs, rm_vects
+from grass_gis_helpers.general import set_nprocs
+from grass_gis_helpers.cleanup import rm_vects
 from grass_gis_helpers.tiling import create_grid
 from grass_gis_helpers.parallel import (
     patching_raster_results,
