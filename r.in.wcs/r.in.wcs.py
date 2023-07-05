@@ -154,17 +154,16 @@ def main():
     NPROCS = set_nprocs(options["nprocs"])
 
     url, msg = set_url(wcs_url, coverageid)
-    pretty_xml = get_xml_data(
-        url, options["username"], options["password"]
-    )
+    pretty_xml = get_xml_data(url, options["username"], options["password"])
     if flags["c"] or flags["d"]:
         print(f"{msg}:\n{pretty_xml}")
     elif flags["l"]:
         parsedresp = xmltodict.parse(pretty_xml)
         coverage_ids = [
-            cov["wcs:CoverageId"] for cov in parsedresp[
-                "wcs:Capabilities"
-            ]["wcs:Contents"]["wcs:CoverageSummary"]
+            cov["wcs:CoverageId"]
+            for cov in parsedresp["wcs:Capabilities"]["wcs:Contents"][
+                "wcs:CoverageSummary"
+            ]
         ]
         print("\n".join(coverage_ids))
     elif options["output"]:

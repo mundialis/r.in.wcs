@@ -86,7 +86,7 @@ def set_user_pw(url, user_inp, password_inp):
     if user_inp and password_inp:
         grass.message(_("Setting username and password..."))
         if os.path.isfile(user_inp):
-            with open(user_inp, encoding='UTF-8') as user_f:
+            with open(user_inp, encoding="UTF-8") as user_f:
                 filecontent = user_f.read()
                 user = filecontent.strip()
         elif user_inp in os.environ:
@@ -95,7 +95,7 @@ def set_user_pw(url, user_inp, password_inp):
             user = user_inp
 
         if os.path.isfile(password_inp):
-            with open(password_inp, encoding='UTF-8') as pw_f:
+            with open(password_inp, encoding="UTF-8") as pw_f:
                 filecontent = pw_f.read()
                 password = filecontent.strip()
         elif password_inp in os.environ:
