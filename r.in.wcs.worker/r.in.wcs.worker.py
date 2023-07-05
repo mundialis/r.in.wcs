@@ -75,6 +75,14 @@
 # % label: Name of new mapset for parallel processing
 # %end
 
+# %option
+# % key: subset_type
+# % type: string
+# % required: yes
+# % multiple: no
+# % label: Type for subset settings e.g. "Lat Long"
+# %end
+
 # %rules
 # % collective: username,password
 # %end
@@ -133,7 +141,12 @@ def main():
     # setting region to area
     grass.run_command("g.region", vector=area, res=res)
 
-    url = set_url(wcs_url, coverageid, out=options["output"])[0]
+    url = set_url(
+        wcs_url,
+        coverageid,
+        out=options["output"],
+        axis=options["subset_type"],
+    )[0]
     set_user_pw(url, options["username"], options["password"])
 
     grass.message(_("Retrieving data..."))

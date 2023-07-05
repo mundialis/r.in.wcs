@@ -63,6 +63,16 @@
 # % label: Password or file with password or environment variable name with password
 # %end
 
+# %option
+# % key: tile_size
+# % type: string
+# % required: no
+# % multiple: no
+# % answer: 1000
+# % label: Tile size for downloading
+# % description: If it is to large the download can fail; The download is depending on the tile_size and the resoulution of the coverage.
+# %end
+
 # %option G_OPT_M_NPROCS
 # % description: Number of cores for multiprocessing, -2 is the number of available cores - 1
 # % answer: -2
@@ -78,16 +88,22 @@
 # % description: DescribeCoverage of WCS Coverage
 # %end
 
+# %flag
+# % key: l
+# % description: List CoverageIds of DescribeCoverage
+# %end
+
 # %rules
-# % exclusive: output,-c,-d
-# % required: output,-c,-d
+# % exclusive: output,-c,-d,-l
+# % required: output,-c,-d,-l
 # % collective: username,password
-# % requires: coverageid,-d,output
+# % requires: coverageid,-d,output,-l
 # %end
 
 import atexit
 import os
 import sys
+import xmltodict
 
 from grass.script import core as grass
 from grass.pygrass.utils import get_lib_path
@@ -137,24 +153,41 @@ def main():
     coverageid = options["coverageid"]
     NPROCS = set_nprocs(options["nprocs"])
 
+    url, msg = set_url(wcs_url, coverageid)
+    pretty_xml = get_xml_data(
+        url, options["username"], options["password"]
+    )
     if flags["c"] or flags["d"]:
-        url, msg = set_url(wcs_url, coverageid)
-        pretty_xml = get_xml_data(
-            url, options["username"], options["password"]
-        )
         print(f"{msg}:\n{pretty_xml}")
+    elif flags["l"]:
+        parsedresp = xmltodict.parse(pretty_xml)
+        coverage_ids = [
+            cov["wcs:CoverageId"] for cov in parsedresp[
+                "wcs:Capabilities"
+            ]["wcs:Contents"]["wcs:CoverageSummary"]
+        ]
+        print("\n".join(coverage_ids))
     elif options["output"]:
-        tmp_id = grass.tempname(12)
-        tiles_list = create_grid(1000, "wcs_grid", tmp_id)
-        RM_VECTORS.extend(tiles_list)
+        # get subset type: NE or LatLong
+        parsedresp = xmltodict.parse(pretty_xml)
+        axis_label = parsedresp["wcs:CoverageDescriptions"][
+            "wcs:CoverageDescription"
+        ]["gml:boundedBy"]["gml:Envelope"]["@axisLabels"]
 
         module_kwargs = {
             "url": wcs_url,
             "output": options["output"],
             "coverageid": coverageid,
+            "subset_type": axis_label,
             "username": options["username"],
             "password": options["password"],
         }
+        # create tiles
+        tmp_id = grass.tempname(12)
+        tiles_list = create_grid(options["tile_size"], "wcs_grid", tmp_id)
+        RM_VECTORS.extend(tiles_list)
+
+        # run worker module parallel
         MAPSET_NAMES, LOCATION_PATH = run_module_parallel(
             "r.in.wcs.worker",
             module_kwargs,

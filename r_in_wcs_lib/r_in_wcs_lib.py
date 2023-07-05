@@ -36,7 +36,7 @@ from bs4 import BeautifulSoup
 import grass.script as grass
 
 
-def set_url(wcs_url, coverageid=None, out=None, version="2.0.1"):
+def set_url(wcs_url, coverageid=None, out=None, version="2.0.1", axis="N E"):
     """Function to set the url for service"""
     # WCS - GetCapabilities
     if coverageid is None or coverageid == "":
@@ -51,18 +51,31 @@ def set_url(wcs_url, coverageid=None, out=None, version="2.0.1"):
         )
         grass.debug(url)
         msg = f"DescribeCoverage of {url}"
-    elif out:
-        reg = grass.region()
-        reg_ns = [float(reg["n"]), float(reg["s"])]
-        reg_ew = [float(reg["e"]), float(reg["w"])]
-        subset = (
-            f"subset=N({min(reg_ns)},{max(reg_ns)})&"
-            f"subset=E({min(reg_ew)},{max(reg_ew)})"
-        )
+    else:
+        if axis == "E N":
+            reg = grass.region()
+            reg_ns = [float(reg["n"]), float(reg["s"])]
+            reg_ew = [float(reg["e"]), float(reg["w"])]
+            subset = (
+                f"&subset=N({min(reg_ns)},{max(reg_ns)})"
+                f"&subset=E({min(reg_ew)},{max(reg_ew)})"
+            )
+        elif axis == "Lat Long":
+            reg = grass.parse_command("g.region", flags="bg", quiet=True)
+            reg_ns = [float(reg["ll_n"]), float(reg["ll_s"])]
+            reg_ew = [float(reg["ll_e"]), float(reg["ll_w"])]
+            subset = (
+                f"&subset=Lat({min(reg_ns)},{max(reg_ns)})"
+                f"&subset=Long({min(reg_ew)},{max(reg_ew)})"
+            )
+        else:
+            grass.fatal(_("Subset not yet supported."))
+
         url = (
             f"{wcs_url}service=WCS&version={version}&request=GetCoverage&"
-            f"CoverageId={coverageid}&format=image/tiff&{subset}"
+            f"CoverageId={coverageid}&format=image/tiff{subset}"
         )
+        grass.debug(url)
         msg = None
     return url, msg
 
@@ -89,7 +102,6 @@ def set_user_pw(url, user_inp, password_inp):
             password = os.environ[password_inp]
         else:
             password = password_inp
-        print(password)
 
         passmgr = HTTPPasswordMgrWithDefaultRealm()
         passmgr.add_password(None, url, user, password)
@@ -102,11 +114,10 @@ def set_user_pw(url, user_inp, password_inp):
 def get_xml_data(url, user, password):
     """Function to get the xml data from url"""
     set_user_pw(url, user, password)
+    out = ""
     try:
-        out = ""
         with urlopen(url) as inf:
             out += inf.read().decode()
-        # inf = urlopen(url)
     except HTTPError as http_e:
         # GTC WFS request HTTP failure
         grass.fatal(
@@ -117,12 +128,5 @@ def get_xml_data(url, user, password):
         )
     except URLError as url_e:
         grass.fatal(_(f"Failed to reach the server.\nReason: {url_e.reason}"))
-    # out = ""
-    # while True:
-    #     data = inf.read()
-    #     if not data:
-    #         break
-    #     out += data.decode()
-    # inf.close()
     xml_out = BeautifulSoup(out, "xml")
     return xml_out.prettify()
