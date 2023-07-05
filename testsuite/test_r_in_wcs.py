@@ -31,6 +31,7 @@ import grass.script as grass
 
 class TestRInWcs(TestCase):
     """Test class for r.in.wcs"""
+
     pid = os.getpid()
     region = f"r_in_wcs_orig_region_{pid}"
     out = f"r_in_wcs_test_output_{pid}"
@@ -68,7 +69,7 @@ class TestRInWcs(TestCase):
     def tearDownClass(cls):
         """Remove the temporary region and generated data"""
         cls.runModule("g.region", region=cls.region)
-        cls.runModule("g.remove", type="region", name=cls.region , flags="f")
+        cls.runModule("g.remove", type="region", name=cls.region, flags="f")
         # check number of data in mapset
         num_data = len(grass.parse_command("g.list", type="all", mapset="."))
         if num_data != cls.num_data:
