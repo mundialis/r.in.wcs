@@ -1,0 +1,38 @@
+<h2>DESCRIPTION</h2>
+
+<em>r.in.wcs</em> imports GetCoverage from a WCS server via requests.
+<p>
+
+<h2>EXAMPLE</h2>
+
+<h3>Import WCS of global worldpop map</h3>
+
+Import WCS of global worldpop map in `nc_spm_08` location:
+
+<div class="code"><pre>
+g.region n=187000 s=185000 w=173000 e=173300 -p res=1
+
+# get GetCapabilities
+r.in.wcs -c url=https://geoserver.mundialis.de/geoserver/global/ows?
+# list coverageIds
+r.in.wcs -l url=https://geoserver.mundialis.de/geoserver/global/ows?
+# get DescribeCoverage
+r.in.wcs -d url=https://geoserver.mundialis.de/geoserver/global/ows? coverageid=global__worldpop_2020_1km_aggregated_UNadj
+# importing data
+r.in.wcs output=worldpop url=https://geoserver.mundialis.de/geoserver/global/ows? coverageid=global__worldpop_2020_1km_aggregated_UNadj tile_size=10000
+</pre></div>
+
+<h2>SEE ALSO</h2>
+
+<em>
+<a href="r.import.html">r.import</a>
+</em>
+
+<h2>REQUIREMENTS</h2>
+<div class="code"><pre>
+pip install grass-gis-helpers
+</pre></div>
+
+<h2>AUTHOR</h2>
+
+Anika Weinmann, <a href="https://www.mundialis.de/">mundialis GmbH &amp; Co. KG</a>, Germany
