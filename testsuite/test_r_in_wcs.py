@@ -22,7 +22,6 @@
 #############################################################################
 
 import os
-import sys
 
 from grass.gunittest.case import TestCase
 from grass.gunittest.main import test
@@ -30,8 +29,8 @@ from grass.gunittest.gmodules import SimpleModule
 import grass.script as grass
 
 
-class TestRDopImport(TestCase):
-
+class TestRInWcs(TestCase):
+    """Test class for r.in.wcs"""
     pid = os.getpid()
     region = f"r_in_wcs_orig_region_{pid}"
     out = f"r_in_wcs_test_output_{pid}"
@@ -47,6 +46,7 @@ class TestRDopImport(TestCase):
     num_data = None
 
     @classmethod
+    # pylint: disable=invalid-name
     def setUpClass(cls):
         """Ensures expected computational region"""
         cls.num_data = len(
@@ -64,17 +64,17 @@ class TestRDopImport(TestCase):
         )
 
     @classmethod
+    # pylint: disable=invalid-name
     def tearDownClass(cls):
         """Remove the temporary region and generated data"""
         cls.runModule("g.region", region=cls.region)
-        cls.runModule("g.remove", type="region", name=cls.region, flags="f")
+        cls.runModule("g.remove", type="region", name=cls.region , flags="f")
         # check number of data in mapset
-        num_data = len(
-            grass.parse_command("g.list", type="all", mapset=".")
-        )
+        num_data = len(grass.parse_command("g.list", type="all", mapset="."))
         if num_data != cls.num_data:
-            raise Exception("Test or addon does not clean up correctly")
+            cls.fail(cls, "Test or addon does not cleaned up correctly.")
 
+    # pylint: disable=invalid-name
     def tearDown(self):
         """Remove the outputs created
         This is executed after each test run.
@@ -97,9 +97,7 @@ class TestRDopImport(TestCase):
             url=self.url,
             flags="c",
         )
-        self.assertModule(
-            r_check, "GetCapabilities fails."
-        )
+        self.assertModule(r_check, "GetCapabilities fails.")
         stdout = r_check.outputs.stdout
         self.assertIn(
             self.coverageid,
@@ -118,9 +116,7 @@ class TestRDopImport(TestCase):
             url=self.url,
             flags="l",
         )
-        self.assertModule(
-            r_check, "List coverage ids fails."
-        )
+        self.assertModule(r_check, "List coverage ids fails.")
         stdout = r_check.outputs.stdout
         self.assertIn(
             self.coverageid,
@@ -130,7 +126,7 @@ class TestRDopImport(TestCase):
         self.assertEqual(
             len(stdout.split("\n")),
             self.num_coverage_ids,
-            f"Length of the coverage id list not {self.num_coverage_ids}."
+            f"Length of the coverage id list not {self.num_coverage_ids}.",
         )
         print("Test list coverage ids successfully finished.\n")
 
@@ -145,9 +141,7 @@ class TestRDopImport(TestCase):
             flags="d",
             coverageid=self.coverageid,
         )
-        self.assertModule(
-            r_check, "DescribeCoverage fails."
-        )
+        self.assertModule(r_check, "DescribeCoverage fails.")
         stdout = r_check.outputs.stdout
         self.assertIn(
             self.coverageid,
@@ -173,9 +167,7 @@ class TestRDopImport(TestCase):
             output=self.out,
             tile_size=10000,
         )
-        self.assertModule(
-            r_check, "data import fails."
-        )
+        self.assertModule(r_check, "data import fails.")
         self.assertRasterExists(self.out)
         self.assertRasterMinMax(
             self.out, 32.67583, 184.805, "Raster range wrong"
