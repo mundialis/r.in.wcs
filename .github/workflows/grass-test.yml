@@ -1,0 +1,36 @@
+name: Run tests for GRASS GIS addons
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ main ]
+
+jobs:
+  tests:
+    runs-on: osgeo/grass-gis:stable-alpine
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install apk dependencies
+      run: apk add gcc make
+    - name: Install addon requirements
+      if: ${{ hashFiles('requirements.txt') != '' }}
+      run: pip3 install -r requirements.txt
+    - name: Running addon tests
+      run: grass -c epsg:3358 /grassdb/nc_spm_empty --exec bash test.sh
+    # runs-on: ubuntu-latest
+    # steps:
+    # - name: Checkout
+    #   uses: actions/checkout@v3
+    # - name: Set up Docker Buildx
+    #   uses: docker/setup-buildx-action@v2
+    # - name: Test of GRASS GIS addon
+    #   id: docker_build
+    #   uses: docker/build-push-action@v4
+    #   with:
+    #     push: false
+    #     tags: addon-tests:alpine
+    #     context: .
+    #     file: .github/workflows/Dockerfile
+    #     no-cache: true
+    #     build-args: NC_TEST_DATA=NC
