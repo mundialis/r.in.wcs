@@ -31,6 +31,6 @@ jobs:
         push: false
         tags: addon-tests:alpine
         context: .
-        file: .github/workflows/Dockerfile
+        file: test-docker/Dockerfile
         no-cache: true
         build-args: NC_TEST_DATA=NC
