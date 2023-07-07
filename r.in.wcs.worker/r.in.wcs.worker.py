@@ -156,8 +156,8 @@ def main():
     RM_FILES.append(tif)
     try:
         urlretrieve(url, tif)
-    except URLError as url_e:
-        grass.fatal(_(f"Failed to reach the server.\nReason: {url_e.reason}"))
+    except URLError:
+        grass.fatal(_(f"Failed to reach the server.\nURL: {url}"))
     grass.run_command("r.import", input=tif, output=options["output"])
     grass.message(
         _(f"WCS Coverage {coverageid} is impored as {options['output']}")

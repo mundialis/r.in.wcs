@@ -1,0 +1,4 @@
+beautifulsoup4
+grass-gis-helpers
+lxml
+xmltodict
