@@ -8,6 +8,4 @@ on:
 
 jobs:
   tests:
-    uses: mundialis/github-workflows/.github/workflows/grass-tests.yml@grass-tests
-    # with:
-    #   NC_TEST_DATA: 'NC'
+    uses: mundialis/github-workflows/.github/workflows/grass-tests.yml@main
