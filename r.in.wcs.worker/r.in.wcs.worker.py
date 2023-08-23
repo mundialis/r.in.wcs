@@ -97,8 +97,15 @@ from urllib.error import URLError
 from grass.script import core as grass
 from grass.pygrass.utils import get_lib_path
 
-from grass_gis_helpers.mapset import switch_to_new_mapset
-
+try:
+    from grass_gis_helpers.mapset import switch_to_new_mapset
+except ImportError:
+    grass.fatal(
+        _(
+            "Please check if the python library grass_gis_helpers is "
+            "installed or install it with: <pip install grass-gis-helpers>"
+        )
+    )
 
 # initialize global vars
 RM_FILES = []

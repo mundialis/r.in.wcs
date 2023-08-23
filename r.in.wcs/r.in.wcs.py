@@ -109,14 +109,21 @@ from grass.script import core as grass
 from grass.pygrass.utils import get_lib_path
 from grass.script.utils import try_rmdir
 
-from grass_gis_helpers.general import set_nprocs
-from grass_gis_helpers.cleanup import rm_vects
-from grass_gis_helpers.tiling import create_grid
-from grass_gis_helpers.parallel import (
-    patching_raster_results,
-    run_module_parallel,
-)
-
+try:
+    from grass_gis_helpers.general import set_nprocs
+    from grass_gis_helpers.cleanup import rm_vects
+    from grass_gis_helpers.tiling import create_grid
+    from grass_gis_helpers.parallel import (
+        patching_raster_results,
+        run_module_parallel,
+    )
+except ImportError:
+    grass.fatal(
+        _(
+            "Please check if the python library grass_gis_helpers is "
+            "installed or install it with: <pip install grass-gis-helpers>"
+        )
+    )
 
 # initialize global vars
 LOCATION_PATH = None
