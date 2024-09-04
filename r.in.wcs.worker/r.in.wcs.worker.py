@@ -174,40 +174,37 @@ def main():
     tif = tif.replace(".0", ".tif")
     RM_FILES.append(tif)
 
-    num_retry_no_connection = 0
-    while num_retry_no_connection <= num_retry_max:
+    num_retry = 0
+    while num_retry <= num_retry_max:
         try:
-            num_retry_unstable_connection = 0
-            while num_retry_unstable_connection <= num_retry_max:
-                urlretrieve(url, tif)
-                gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(tif)
-                if (
-                    gdalinfo_returncode != 0
-                    or ("TIFFReadEncodedStrip" in gdalinfo_err)
-                    or ("TIFFReadEncodedTile" in gdalinfo_err)
-                ):
-                    if num_retry_unstable_connection == num_retry_max:
-                        grass.fatal(
-                            _(
-                                "Failed to download tif after "
-                                f"{num_retry_max} retries."
-                            )
-                        )
-                    grass.warning(
+            urlretrieve(url, tif)
+            gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(tif)
+            if (
+                gdalinfo_returncode != 0
+                or ("TIFFReadEncodedStrip" in gdalinfo_err)
+                or ("TIFFReadEncodedTile" in gdalinfo_err)
+            ):
+                if num_retry == num_retry_max:
+                    grass.fatal(
                         _(
-                            f"Broken tif downloaded, with error {gdalinfo_err}."
-                            " Try to re-download. Retry "
-                            f"{num_retry_unstable_connection}/{num_retry_max} ..."
+                            "Failed to download tif after "
+                            f"{num_retry_max} retries."
                         )
                     )
-                    sleep(5)
-                    os.remove(tif)
-                    num_retry_unstable_connection += 1
-                else:
-                    num_retry_no_connection=num_retry_max+1
-                    break
+                grass.warning(
+                    _(
+                        f"Broken tif downloaded, with error {gdalinfo_err}."
+                        " Try to re-download. Retry "
+                        f"{num_retry}/{num_retry_max} ..."
+                    )
+                )
+                sleep(5)
+                os.remove(tif)
+                num_retry += 1
+            else:
+                break
         except URLError as e:
-            if num_retry_no_connection == num_retry_max:
+            if num_retry == num_retry_max:
                 grass.fatal(
                     _(
                         f"Failed to reach the server.\nURL: {url} "
@@ -217,11 +214,11 @@ def main():
             grass.warning(
                 _(
                     f"Failed to reach the server.\nURL: {url}. With Error {e}. "
-                    f"Retry {num_retry_no_connection}/{num_retry_max} ..."
+                    f"Retry {num_retry}/{num_retry_max} ..."
                 )
             )
             sleep(5)
-            num_retry_no_connection += 1
+            num_retry += 1
 
     grass.run_command("r.import", input=tif, output=options["output"])
     grass.message(
