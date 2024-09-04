@@ -195,8 +195,8 @@ def main():
                 grass.warning(
                     _(
                         f"Broken tif downloaded, with error {gdalinfo_err}."
-                        " Try to re-download. "
-                        f"Retry {num_retry_unstable_connection}/{num_retry_max} ..."
+                        " Try to re-download. Retry "
+                        f"{num_retry_unstable_connection}/{num_retry_max} ..."
                     )
                 )
                 sleep(5)
