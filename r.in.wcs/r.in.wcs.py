@@ -73,6 +73,15 @@
 # % description: If it is to large the download can fail; The download is depending on the tile_size and the resoulution of the coverage.
 # %end
 
+# %option
+# % key: num_retry
+# % type: int
+# % required: no
+# % answer: 0
+# % multiple: no
+# % label: Number of download retries
+# %end
+
 # %option G_OPT_M_NPROCS
 # % description: Number of cores for multiprocessing, -2 is the number of available cores - 1
 # % answer: -2
@@ -188,6 +197,7 @@ def main():
             "subset_type": axis_label,
             "username": options["username"],
             "password": options["password"],
+            "num_retry": options["num_retry"],
         }
         # create tiles
         tmp_id = grass.tempname(12)

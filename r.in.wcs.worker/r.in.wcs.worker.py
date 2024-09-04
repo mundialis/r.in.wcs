@@ -3,11 +3,11 @@
 ############################################################################
 #
 # MODULE:      r.in.wcs.worker
-# AUTHOR(S):   Anika Weinmann
+# AUTHOR(S):   Anika Weinmann, Lina Krisztian
 #
 # PURPOSE:     Worker addon of r.in.wcs which imports GetCoverage from a WCS
 #              server via requests
-# COPYRIGHT:   (C) 2023 by Anika Weinmann, mundialis GmbH & Co. KG and the
+# COPYRIGHT:   (C) 2023-2024 by Anika Weinmann, mundialis GmbH & Co. KG and the
 #              GRASS Development Team
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -83,12 +83,22 @@
 # % label: Type for subset settings e.g. "Lat Long"
 # %end
 
+# %option
+# % key: num_retry
+# % type: int
+# % required: no
+# % answer: 0
+# % multiple: no
+# % label: Number of download retries
+# %end
+
 # %rules
 # % collective: username,password
 # %end
 
 import atexit
 import os
+from time import sleep
 import sys
 
 from urllib.request import urlretrieve
@@ -99,6 +109,7 @@ from grass.pygrass.utils import get_lib_path
 
 try:
     from grass_gis_helpers.mapset import switch_to_new_mapset
+    from grass_gis_helpers.validation import get_gdalinfo_returncodes
 except ImportError:
     grass.fatal(
         _(
@@ -144,6 +155,7 @@ def main():
     wcs_url = options["url"]
     coverageid = options["coverageid"]
     area = f"{options['area']}@{old_mapset}"
+    num_retry_max = options["num_retry"]
 
     # setting region to area
     grass.run_command("g.region", vector=area, res=res)
@@ -161,10 +173,53 @@ def main():
     os.remove(tif)
     tif = tif.replace(".0", ".tif")
     RM_FILES.append(tif)
-    try:
-        urlretrieve(url, tif)
-    except URLError:
-        grass.fatal(_(f"Failed to reach the server.\nURL: {url}"))
+
+    num_retry_no_connection = 0
+    while num_retry_no_connection <= num_retry_max:
+        try:
+            num_retry_unstable_connection = 0
+            urlretrieve(url, tif)
+            gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(tif)
+            if (
+                gdalinfo_returncode != 0
+                or ("TIFFReadEncodedStrip" in gdalinfo_err)
+                or ("TIFFReadEncodedTile" in gdalinfo_err)
+            ):
+                if num_retry_unstable_connection == num_retry_max:
+                    grass.fatal(
+                        _(
+                            f"Failed to download tif after {num_retry_max} retries."
+                        )
+                    )
+                grass.warning(
+                    _(
+                        f"Broken tif downloaded, with error {gdalinfo_err}. Try to re-download. Retry {num_retry_unstable_connection}/{num_retry_max} ..."
+                    )
+                )
+                sleep(5)
+                os.remove(tif)
+                urlretrieve(url, tif)
+                gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(
+                    tif
+                )
+                num_retry_unstable_connection += 1
+            else:
+                break
+        except URLError as e:
+            if num_retry_no_connection == num_retry_max:
+                grass.fatal(
+                    _(
+                        f"Failed to reach the server.\nURL: {url} after {num_retry_max} retries."
+                    )
+                )
+            grass.warning(
+                _(
+                    f"Failed to reach the server.\nURL: {url}. With Error {e}. Retry {num_retry_no_connection}/{num_retry_max} ..."
+                )
+            )
+            sleep(5)
+            num_retry_no_connection += 1
+
     grass.run_command("r.import", input=tif, output=options["output"])
     grass.message(
         _(f"WCS Coverage {coverageid} is impored as {options['output']}")
