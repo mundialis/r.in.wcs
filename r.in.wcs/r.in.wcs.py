@@ -79,7 +79,7 @@
 # % required: no
 # % answer: 0
 # % multiple: no
-# % label: Number of download retries
+# % label: Maximum number of download retries
 # %end
 
 # %option G_OPT_M_NPROCS
