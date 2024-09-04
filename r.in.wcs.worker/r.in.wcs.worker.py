@@ -188,12 +188,15 @@ def main():
                 if num_retry_unstable_connection == num_retry_max:
                     grass.fatal(
                         _(
-                            f"Failed to download tif after {num_retry_max} retries."
+                            "Failed to download tif after "
+                            f"{num_retry_max} retries."
                         )
                     )
                 grass.warning(
                     _(
-                        f"Broken tif downloaded, with error {gdalinfo_err}. Try to re-download. Retry {num_retry_unstable_connection}/{num_retry_max} ..."
+                        f"Broken tif downloaded, with error {gdalinfo_err}."
+                        " Try to re-download. "
+                        f"Retry {num_retry_unstable_connection}/{num_retry_max} ..."
                     )
                 )
                 sleep(5)
@@ -209,12 +212,14 @@ def main():
             if num_retry_no_connection == num_retry_max:
                 grass.fatal(
                     _(
-                        f"Failed to reach the server.\nURL: {url} after {num_retry_max} retries."
+                        f"Failed to reach the server.\nURL: {url} "
+                        f"after {num_retry_max} retries."
                     )
                 )
             grass.warning(
                 _(
-                    f"Failed to reach the server.\nURL: {url}. With Error {e}. Retry {num_retry_no_connection}/{num_retry_max} ..."
+                    f"Failed to reach the server.\nURL: {url}. With Error {e}. "
+                    "Retry {num_retry_no_connection}/{num_retry_max} ..."
                 )
             )
             sleep(5)
