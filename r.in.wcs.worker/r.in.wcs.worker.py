@@ -178,36 +178,34 @@ def main():
     while num_retry_no_connection <= num_retry_max:
         try:
             num_retry_unstable_connection = 0
-            urlretrieve(url, tif)
-            gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(tif)
-            if (
-                gdalinfo_returncode != 0
-                or ("TIFFReadEncodedStrip" in gdalinfo_err)
-                or ("TIFFReadEncodedTile" in gdalinfo_err)
-            ):
-                if num_retry_unstable_connection == num_retry_max:
-                    grass.fatal(
+            while num_retry_unstable_connection <= num_retry_max:
+                urlretrieve(url, tif)
+                gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(tif)
+                if (
+                    gdalinfo_returncode != 0
+                    or ("TIFFReadEncodedStrip" in gdalinfo_err)
+                    or ("TIFFReadEncodedTile" in gdalinfo_err)
+                ):
+                    if num_retry_unstable_connection == num_retry_max:
+                        grass.fatal(
+                            _(
+                                "Failed to download tif after "
+                                f"{num_retry_max} retries."
+                            )
+                        )
+                    grass.warning(
                         _(
-                            "Failed to download tif after "
-                            f"{num_retry_max} retries."
+                            f"Broken tif downloaded, with error {gdalinfo_err}."
+                            " Try to re-download. Retry "
+                            f"{num_retry_unstable_connection}/{num_retry_max} ..."
                         )
                     )
-                grass.warning(
-                    _(
-                        f"Broken tif downloaded, with error {gdalinfo_err}."
-                        " Try to re-download. Retry "
-                        f"{num_retry_unstable_connection}/{num_retry_max} ..."
-                    )
-                )
-                sleep(5)
-                os.remove(tif)
-                urlretrieve(url, tif)
-                gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(
-                    tif
-                )
-                num_retry_unstable_connection += 1
-            else:
-                break
+                    sleep(5)
+                    os.remove(tif)
+                    num_retry_unstable_connection += 1
+                else:
+                    num_retry_no_connection=num_retry_max+1
+                    break
         except URLError as e:
             if num_retry_no_connection == num_retry_max:
                 grass.fatal(
