@@ -85,7 +85,7 @@
 
 # %option
 # % key: num_retry
-# % type: int
+# % type: integer
 # % required: no
 # % answer: 0
 # % multiple: no
@@ -155,7 +155,7 @@ def main():
     wcs_url = options["url"]
     coverageid = options["coverageid"]
     area = f"{options['area']}@{old_mapset}"
-    num_retry_max = options["num_retry"]
+    num_retry_max = int(options["num_retry"])
 
     # setting region to area
     grass.run_command("g.region", vector=area, res=res)
@@ -219,7 +219,7 @@ def main():
             grass.warning(
                 _(
                     f"Failed to reach the server.\nURL: {url}. With Error {e}. "
-                    "Retry {num_retry_no_connection}/{num_retry_max} ..."
+                    f"Retry {num_retry_no_connection}/{num_retry_max} ..."
                 )
             )
             sleep(5)

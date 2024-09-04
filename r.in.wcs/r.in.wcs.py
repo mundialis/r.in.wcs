@@ -75,7 +75,7 @@
 
 # %option
 # % key: num_retry
-# % type: int
+# % type: integer
 # % required: no
 # % answer: 0
 # % multiple: no
