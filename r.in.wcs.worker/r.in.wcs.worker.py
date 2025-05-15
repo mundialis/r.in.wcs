@@ -184,8 +184,8 @@ def main():
 
     kwargs = {}
     if options["sort_attr"]:
-        kwargs["sortBy_attr"] = options["sort_attr"]
-        kwargs["sortBy_order"] = options["sort_order"]
+        kwargs["sortby_attr"] = options["sort_attr"]
+        kwargs["sortby_order"] = options["sort_order"]
     url = set_url(
         wcs_url,
         coverageid,
