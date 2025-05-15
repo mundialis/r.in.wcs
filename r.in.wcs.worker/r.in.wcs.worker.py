@@ -106,7 +106,6 @@
 # % required: no
 # % multiple: no
 # % options: A,D
-# % answer: D
 # % label: Order for sorting the granules. A for ascending, or D for descending
 # %end
 
@@ -185,7 +184,8 @@ def main():
     kwargs = {}
     if options["sort_attr"]:
         kwargs["sortby_attr"] = options["sort_attr"]
-        kwargs["sortby_order"] = options["sort_order"]
+        if options["sort_order"]:
+            kwargs["sortby_order"] = options["sort_order"]
     url = set_url(
         wcs_url,
         coverageid,

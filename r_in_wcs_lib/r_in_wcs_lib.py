@@ -43,7 +43,7 @@ def set_url(
     version="2.0.1",
     axis="N E",
     sortby_attr=None,
-    sortby_order=None,
+    sortby_order="D",
 ):
     """Function to set the url for service"""
     # WCS - GetCapabilities

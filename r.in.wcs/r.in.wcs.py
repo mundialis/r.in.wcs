@@ -96,7 +96,6 @@
 # % required: no
 # % multiple: no
 # % options: A,D
-# % answer: D
 # % label: Order for sorting the granules. A for ascending, or D for descending
 # %end
 
@@ -223,7 +222,8 @@ def main():
         }
         if options["sort_attr"]:
             module_kwargs["sort_attr"] = options["sort_attr"]
-            module_kwargs["sort_order"] = options["sort_order"]
+            if options["sort_order"]:
+                module_kwargs["sort_order"] = options["sort_order"]
         # create tiles
         tmp_id = grass.tempname(12)
         tiles_list = create_grid(options["tile_size"], "wcs_grid", tmp_id)
