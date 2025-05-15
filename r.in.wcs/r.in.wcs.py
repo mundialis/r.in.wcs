@@ -82,6 +82,23 @@
 # % label: Maximum number of download retries
 # %end
 
+# %option
+# % key: sort_attr
+# % type: string
+# % required: no
+# % multiple: no
+# % label: Name of attribute for sorting the granules
+# %end
+
+# %option
+# % key: sort_order
+# % type: string
+# % required: no
+# % multiple: no
+# % options: A,D
+# % label: Order for sorting the granules. A for ascending, or D for descending
+# %end
+
 # %option G_OPT_M_NPROCS
 # % description: Number of cores for multiprocessing, -2 is the number of available cores - 1
 # % answer: -2
@@ -107,6 +124,10 @@
 # % required: output,-c,-d,-l
 # % collective: username,password
 # % requires: coverageid,-d,output,-l
+# %end
+
+# %rules
+# % requires: sort_order,sort_attr
 # %end
 
 import atexit
@@ -199,6 +220,10 @@ def main():
             "password": options["password"],
             "num_retry": options["num_retry"],
         }
+        if options["sort_attr"]:
+            module_kwargs["sort_attr"] = options["sort_attr"]
+            if options["sort_order"]:
+                module_kwargs["sort_order"] = options["sort_order"]
         # create tiles
         tmp_id = grass.tempname(12)
         tiles_list = create_grid(options["tile_size"], "wcs_grid", tmp_id)

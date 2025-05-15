@@ -36,7 +36,15 @@ from bs4 import BeautifulSoup
 import grass.script as grass
 
 
-def set_url(wcs_url, coverageid=None, out=None, version="2.0.1", axis="N E"):
+def set_url(
+    wcs_url,
+    coverageid=None,
+    out=None,
+    version="2.0.1",
+    axis="N E",
+    sortby_attr=None,
+    sortby_order="D",
+):
     """Function to set the url for service"""
     # WCS - GetCapabilities
     if coverageid is None or coverageid == "":
@@ -75,6 +83,10 @@ def set_url(wcs_url, coverageid=None, out=None, version="2.0.1", axis="N E"):
             f"{wcs_url}service=WCS&version={version}&request=GetCoverage&"
             f"CoverageId={coverageid}&format=image/tiff{subset}"
         )
+        # see also:
+        # https://docs.geoserver.org/main/en/user/services/wcs/vendor.html#sortby
+        if sortby_attr:
+            url += f"&sortBy={sortby_attr} {sortby_order}".replace(" ", "%20")
         grass.debug(url)
         msg = None
     return url, msg
