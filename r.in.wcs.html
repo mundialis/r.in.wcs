@@ -22,6 +22,14 @@ r.in.wcs -d url=https://geoserver.mundialis.de/geoserver/global/ows? coverageid=
 r.in.wcs output=worldpop url=https://geoserver.mundialis.de/geoserver/global/ows? coverageid=global__worldpop_2020_1km_aggregated_UNadj tile_size=10000
 </pre></div>
 
+<h3>Import WCS with overlapping granules</h3>
+<div class="code"><pre>
+# By default in descending order of given attribute (sort_attr)
+r.in.wcs output=... url=... coverageid=... tile_size=... sort_attr=timestamp
+# Set ascending order
+r.in.wcs output=... url=... coverageid=... tile_size=... sort_attr=timestamp sort_order=A
+</pre></div>
+
 <h2>SEE ALSO</h2>
 
 <em>

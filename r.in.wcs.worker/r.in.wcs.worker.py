@@ -92,8 +92,30 @@
 # % label: Maximum number of download retries
 # %end
 
+# %option
+# % key: sort_attr
+# % type: string
+# % required: no
+# % multiple: no
+# % label: Name of attribute for sorting the granules
+# %end
+
+# %option
+# % key: sort_order
+# % type: string
+# % required: no
+# % multiple: no
+# % options: A,D
+# % answer: D
+# % label: Order for sorting the granules. A for ascending, or D for descending
+# %end
+
 # %rules
 # % collective: username,password
+# %end
+
+# %rules
+# % requires: sort_order,sort_attr
 # %end
 
 import atexit
@@ -144,7 +166,7 @@ def main():
             set_user_pw,
         )
     except ImportError:
-        grass.fatal("analyse_trees_lib missing.")
+        grass.fatal("r_in_wcs_lib missing.")
 
     res = grass.region()["nsres"]
 
@@ -160,11 +182,16 @@ def main():
     # setting region to area
     grass.run_command("g.region", vector=area, res=res)
 
+    kwargs = {}
+    if options["sort_attr"]:
+        kwargs["sortBy_attr"] = options["sort_attr"]
+        kwargs["sortBy_order"] = options["sort_order"]
     url = set_url(
         wcs_url,
         coverageid,
         out=options["output"],
         axis=options["subset_type"],
+        **kwargs,
     )[0]
     set_user_pw(url, options["username"], options["password"])
 
