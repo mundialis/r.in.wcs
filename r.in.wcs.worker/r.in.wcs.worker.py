@@ -211,6 +211,13 @@ def main():
                 )
             else:
                 response = requests.get(url)
+            resp_status = response.status_code
+            if resp_status != 200:
+                grass.fatal(
+                    _(
+                        f"Error code {resp_status} with error:\n {response.reason}"
+                    )
+                )
             with open(tif, "wb") as f:
                 f.write(response.content)
             gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(tif)
