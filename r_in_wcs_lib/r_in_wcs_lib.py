@@ -127,9 +127,7 @@ def get_xml_data(url, user, password):
         resp_status = response.status_code
         if resp_status != 200:
             grass.fatal(
-                _(
-                    f"Error code {resp_status} with error:\n {response.reason}"
-                )
+                _(f"Error code {resp_status} with error:\n {response.reason}")
             )
         out = response.content
     # pylint: disable=E1101
