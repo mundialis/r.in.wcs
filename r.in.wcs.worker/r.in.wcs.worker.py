@@ -215,7 +215,8 @@ def main():
             if resp_status != 200:
                 grass.fatal(
                     _(
-                        f"Error code {resp_status} with error:\n {response.reason}"
+                        f"Error code {resp_status} "
+                        f"with error:\n {response.reason}"
                     )
                 )
             with open(tif, "wb") as f:
