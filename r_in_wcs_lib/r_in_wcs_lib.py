@@ -111,16 +111,19 @@ def get_user_pw(user_inp, password_inp):
         else:
             password = password_inp
 
-    return user, password
+        return user, password
 
 
 def get_xml_data(url, user, password):
     """Function to get the xml data from url"""
     try:
-        response = requests.get(
-            url,
-            auth=HTTPBasicAuth(*get_user_pw(user, password)),
-        )
+        if user:
+            response = requests.get(
+                url,
+                auth=HTTPBasicAuth(*get_user_pw(user, password)),
+            )
+        else:
+            response = requests.get(url)
         out = response.content
     # pylint: disable=E1101
     except HTTPError as http_e:

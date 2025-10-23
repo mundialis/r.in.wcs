@@ -202,12 +202,15 @@ def main():
     num_retry = 0
     while num_retry <= num_retry_max:
         try:
-            response = requests.get(
-                url,
-                auth=HTTPBasicAuth(
-                    *get_user_pw(options["username"], options["password"])
-                ),
-            )
+            if options["username"]:
+                response = requests.get(
+                    url,
+                    auth=HTTPBasicAuth(
+                        *get_user_pw(options["username"], options["password"])
+                    ),
+                )
+            else:
+                response = requests.get(url)
             with open(tif, "wb") as f:
                 f.write(response.content)
             gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(tif)
