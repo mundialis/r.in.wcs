@@ -153,7 +153,6 @@ def cleanup():
 
 def main():
     """Main function of r.in.wcs"""
-
     path = get_lib_path(modname="r.in.wcs", libname="r_in_wcs_lib")
     if path is None:
         grass.fatal("Unable to find the r.in.wcs library directory.")
