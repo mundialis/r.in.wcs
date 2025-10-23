@@ -88,7 +88,7 @@ def set_url(
     return url, msg
 
 
-def get_user_pw(url, user_inp, password_inp):
+def get_user_pw(user_inp, password_inp):
     """Function to get the username and password from option, file or
     environment variable"""
     if user_inp and password_inp:
