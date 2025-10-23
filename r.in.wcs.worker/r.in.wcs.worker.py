@@ -235,6 +235,7 @@ def main():
                 num_retry += 1
             else:
                 break
+        # pylint: disable=E1101
         except RequestException as e:
             if num_retry == num_retry_max:
                 grass.fatal(

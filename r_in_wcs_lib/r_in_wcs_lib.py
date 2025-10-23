@@ -122,6 +122,7 @@ def get_xml_data(url, user, password):
             auth=HTTPBasicAuth(*get_user_pw(user, password)),
         )
         out = response.content
+    # pylint: disable=E1101
     except HTTPError as http_e:
         # GTC WFS request HTTP failure
         grass.fatal(
@@ -130,7 +131,8 @@ def get_xml_data(url, user, password):
                 f"Error code: {http_e.code}"
             )
         )
-    except RequestException as url_e:
-        grass.fatal(_(f"Failed to reach the server.\nReason: {url_e.reason}"))
+    # pylint: disable=E1101
+    except RequestException as e:
+        grass.fatal(_(f"Failed to reach the server.\nReason: {e.reason}"))
     xml_out = BeautifulSoup(out, "xml")
     return xml_out.prettify()
