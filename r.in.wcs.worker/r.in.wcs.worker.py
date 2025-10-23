@@ -151,7 +151,7 @@ def cleanup():
             grass.try_remove(file)
 
 
-def main():
+def main():  # noqa: PLR0912
     """Main function of r.in.wcs"""
     path = get_lib_path(modname="r.in.wcs", libname="r_in_wcs_lib")
     if path is None:
