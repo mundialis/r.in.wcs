@@ -23,13 +23,9 @@
 
 import os
 
-from urllib.request import urlopen
-from urllib.request import build_opener, install_opener
-from urllib.request import (
-    HTTPPasswordMgrWithDefaultRealm,
-    HTTPBasicAuthHandler,
-)
-from urllib.error import URLError, HTTPError
+import requests
+from requests.auth import HTTPBasicAuth
+from requests.exceptions import RequestException, HTTPError
 
 from bs4 import BeautifulSoup
 
@@ -92,11 +88,11 @@ def set_url(
     return url, msg
 
 
-def set_user_pw(url, user_inp, password_inp):
+def get_user_pw(user_inp, password_inp):
     """Function to get the username and password from option, file or
     environment variable"""
     if user_inp and password_inp:
-        grass.message(_("Setting username and password..."))
+        grass.message(_("Getting username and password..."))
         if os.path.isfile(user_inp):
             with open(user_inp, encoding="UTF-8") as user_f:
                 filecontent = user_f.read()
@@ -115,21 +111,26 @@ def set_user_pw(url, user_inp, password_inp):
         else:
             password = password_inp
 
-        passmgr = HTTPPasswordMgrWithDefaultRealm()
-        passmgr.add_password(None, url, user, password)
-        authhandler = HTTPBasicAuthHandler(passmgr)
-        opener = build_opener(authhandler)
-        install_opener(opener)
-        grass.message(_("Setting username and password finished"))
+        return user, password
 
 
 def get_xml_data(url, user, password):
     """Function to get the xml data from url"""
-    set_user_pw(url, user, password)
-    out = ""
     try:
-        with urlopen(url) as inf:
-            out += inf.read().decode()
+        if user:
+            response = requests.get(
+                url,
+                auth=HTTPBasicAuth(*get_user_pw(user, password)),
+            )
+        else:
+            response = requests.get(url)
+        resp_status = response.status_code
+        if resp_status != 200:
+            grass.fatal(
+                _(f"Error code {resp_status} with error:\n {response.reason}")
+            )
+        out = response.content
+    # pylint: disable=E1101
     except HTTPError as http_e:
         # GTC WFS request HTTP failure
         grass.fatal(
@@ -138,7 +139,8 @@ def get_xml_data(url, user, password):
                 f"Error code: {http_e.code}"
             )
         )
-    except URLError as url_e:
-        grass.fatal(_(f"Failed to reach the server.\nReason: {url_e.reason}"))
+    # pylint: disable=E1101
+    except RequestException as e:
+        grass.fatal(_(f"Failed to reach the server.\nReason: {e.reason}"))
     xml_out = BeautifulSoup(out, "xml")
     return xml_out.prettify()

@@ -172,7 +172,7 @@ def cleanup():
 
 def main():
     """Main function of r.in.wcs"""
-    global MAPSET_NAMES, LOCATION_PATH, NPROCS, RM_VECTORS
+    global MAPSET_NAMES, LOCATION_PATH, NPROCS
 
     path = get_lib_path(modname="r.in.wcs", libname="r_in_wcs_lib")
     if path is None:

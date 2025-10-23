@@ -122,8 +122,9 @@ import os
 from time import sleep
 import sys
 
-from urllib.request import urlretrieve
-from urllib.error import URLError
+import requests
+from requests.auth import HTTPBasicAuth
+from requests.exceptions import RequestException
 
 from grass.script import core as grass
 from grass.pygrass.utils import get_lib_path
@@ -150,10 +151,8 @@ def cleanup():
             grass.try_remove(file)
 
 
-def main():
+def main():  # noqa: PLR0912
     """Main function of r.in.wcs"""
-    global RM_FILES
-
     path = get_lib_path(modname="r.in.wcs", libname="r_in_wcs_lib")
     if path is None:
         grass.fatal("Unable to find the r.in.wcs library directory.")
@@ -162,7 +161,7 @@ def main():
         # pylint: disable=import-outside-toplevel,no-name-in-module
         from r_in_wcs_lib import (
             set_url,
-            set_user_pw,
+            get_user_pw,
         )
     except ImportError:
         grass.fatal("r_in_wcs_lib missing.")
@@ -193,7 +192,6 @@ def main():
         axis=options["subset_type"],
         **kwargs,
     )[0]
-    set_user_pw(url, options["username"], options["password"])
 
     grass.message(_("Retrieving data..."))
     tif = grass.tempfile()
@@ -204,7 +202,25 @@ def main():
     num_retry = 0
     while num_retry <= num_retry_max:
         try:
-            urlretrieve(url, tif)
+            if options["username"]:
+                response = requests.get(
+                    url,
+                    auth=HTTPBasicAuth(
+                        *get_user_pw(options["username"], options["password"])
+                    ),
+                )
+            else:
+                response = requests.get(url)
+            resp_status = response.status_code
+            if resp_status != 200:
+                grass.fatal(
+                    _(
+                        f"Error code {resp_status} "
+                        f"with error:\n {response.reason}"
+                    )
+                )
+            with open(tif, "wb") as f:
+                f.write(response.content)
             gdalinfo_err, gdalinfo_returncode = get_gdalinfo_returncodes(tif)
             if (
                 gdalinfo_returncode != 0
@@ -230,7 +246,8 @@ def main():
                 num_retry += 1
             else:
                 break
-        except URLError as e:
+        # pylint: disable=E1101
+        except RequestException as e:
             if num_retry == num_retry_max:
                 grass.fatal(
                     _(
