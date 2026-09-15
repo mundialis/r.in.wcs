@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD041 -->
+
 ## DESCRIPTION
 
 *r.in.wcs* imports GetCoverage from a WCS server via requests.
